@@ -1,0 +1,38 @@
+server:
+  port: 8080
+
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+  cloud:
+    function:
+      definition: pullCountries;pullResults;printResults;sumResultsByCountry;printSumResultsByCountry
+    stream:
+      poller:
+        fixed-delay: 20000
+      function:
+        bindings:
+          pullCountries-out-0: countries
+      bindings:
+
+        printCountriesK-in-0:
+          destination: countries
+          group: printCountriesK-group
+
+        pullResults-in-0:
+          destination: countries
+          group: pullResults-group
+        pullResults-out-0:
+          destination: results
+
+        sumResultsByCountry-in-0:
+          destination: results
+          group: sumResultsByCountry-group
+        sumResultsByCountry-out-0:
+          destination: results-sum-by-country
+          group: sumResultsByCountry-group
+
+        printSumResultsByCountry-in-0:
+          destination: results-sum-by-country
+          group: printSumResultsByCountry-group
+
