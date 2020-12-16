@@ -13,7 +13,7 @@ Run the application mvn spring-boot:run
 
 ## How to stop everything
 Stop the application \
-Stop Kafka application (docker-compose -f docker\docker-compose.yml stop)
+Stop Kafka application (docker-compose -f docker\docker-compose.yml stop) \
 Remove stopped Kafka containers (docker-compose -f docker\docker-compose.yml rm)
 
 
