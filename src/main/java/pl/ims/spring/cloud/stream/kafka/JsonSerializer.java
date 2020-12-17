@@ -8,13 +8,13 @@ import java.util.Map;
 /*
  * Created on 2020-12-15 09:07
  */
-public class ProductSerializer implements Serializer<Product> {
+public class JsonSerializer<T> implements Serializer<T> {
 
     @Override
-    public byte[] serialize(String s, Product data) {
+    public byte[] serialize(String s, T t) {
         byte[] ret = null;
         try {
-            ret = JsonObjectMapper.safeWrite(data).getBytes();
+            ret = JsonObjectMapper.safeWrite(t).getBytes();
         } catch(Exception e) {
             e.printStackTrace();
         }
@@ -26,10 +26,10 @@ public class ProductSerializer implements Serializer<Product> {
     }
 
     @Override
-    public byte[] serialize(String topic, Headers headers, Product data) {
+    public byte[] serialize(String topic, Headers headers, T t) {
         byte[] ret = null;
         try {
-            ret = JsonObjectMapper.safeWrite(data).getBytes();
+            ret = JsonObjectMapper.safeWrite(t).getBytes();
         } catch(Exception e) {
             e.printStackTrace();
         }

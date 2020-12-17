@@ -9,12 +9,21 @@ import java.util.Map;
 /*
  * Created on 2020-12-15 09:07
  */
-public class UserDeserializer implements Deserializer<User> {
+public class JsonDeserializer<T> implements Deserializer<T> {
+
+    private Class<T> tClass;
+
+    public JsonDeserializer() {
+    }
+
+    public JsonDeserializer(Class<T> tClass) {
+        this.tClass = tClass;
+    }
 
     @Override
-    public User deserialize(String s, byte[] data) {
+    public T deserialize(String s, byte[] data) {
         try {
-            return JsonObjectMapper.read(new String(data), User.class);
+            return JsonObjectMapper.read(new String(data), tClass);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -27,9 +36,9 @@ public class UserDeserializer implements Deserializer<User> {
     }
 
     @Override
-    public User deserialize(String topic, Headers headers, byte[] data) {
+    public T deserialize(String topic, Headers headers, byte[] data) {
         try {
-            return JsonObjectMapper.read(new String(data), User.class);
+            return JsonObjectMapper.read(new String(data), tClass);
         } catch (IOException e) {
             e.printStackTrace();
         }
