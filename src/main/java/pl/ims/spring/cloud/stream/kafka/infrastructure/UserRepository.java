@@ -19,14 +19,6 @@ public class UserRepository {
 
     @PostConstruct
     public void init() {
-//        InputStream inputStreamDefault = SpringCloudStreamKafkaApplication.class.getResourceAsStream("/users.json");
-//        try {
-//            users = JsonObjectMapper.read(inputStreamDefault, User[].class);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            users = new User[0];
-//        }
-
         int count = 5;
         users = Stream.iterate(1, i -> i + 1)
                 .limit(count)
