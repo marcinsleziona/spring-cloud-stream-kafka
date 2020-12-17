@@ -5,34 +5,60 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
   cloud:
-    function:
-      definition: pullCountries;pullResults;printResults;sumResultsByCountry;printSumResultsByCountry
     stream:
-      poller:
-        fixed-delay: 20000
       function:
+        definition: usersKeySelection;printUsers;productsKeySelection;printProducts;pullProductWatchedByUserEvents;printProductWatchedByUserEvents
         bindings:
-          pullCountries-out-0: countries
+          pullProductWatchedByUserEvents-out-0: product-watched-by-user-source
+      poller:
+        fixed-delay: 500
+
+      # stream bridge
+      source: pullUsers;pullProducts
+
+      kafka:
+        streams:
+          bindings:
+            usersKeySelection-out-0:
+              producer:
+                keySerde: org.apache.kafka.common.serialization.Serdes$StringSerde
+                valueSerde: org.springframework.kafka.support.serializer.JsonSerde
+            productsKeySelection-out-0:
+              producer:
+                keySerde: org.apache.kafka.common.serialization.Serdes$LongSerde
+                valueSerde: org.springframework.kafka.support.serializer.JsonSerde
+
       bindings:
+        pullUsers-out-0:
+          label: pullUsers-out-0
+          destination: users-source
+        usersKeySelection-in-0:
+          destination: users-source
+          group: usersKeySelection-group
+        usersKeySelection-out-0:
+          destination: users
+        printUsers-in-0:
+          destination: users
+          group: printUsers-group
 
-        printCountriesK-in-0:
-          destination: countries
-          group: printCountriesK-group
+        pullProducts-out-0:
+          label: pullProducts-out-0
+          destination: products-source
+        productsKeySelection-in-0:
+          destination: products-source
+          group: productsKeySelection-group
+        productsKeySelection-out-0:
+          destination: products
 
-        pullResults-in-0:
-          destination: countries
-          group: pullResults-group
-        pullResults-out-0:
-          destination: results
+        printProducts-in-0:
+          destination: products
+          group: printProducts-group
 
-        sumResultsByCountry-in-0:
-          destination: results
-          group: sumResultsByCountry-group
-        sumResultsByCountry-out-0:
-          destination: results-sum-by-country
-          group: sumResultsByCountry-group
+        pullProductWatchedByUserEvents-out-0:
+          destination: product-watched-by-user-source
 
-        printSumResultsByCountry-in-0:
-          destination: results-sum-by-country
-          group: printSumResultsByCountry-group
+        printProductWatchedByUserEvents-in-0:
+          destination: product-watched-by-user-source
+          group: printProductWatchedByUserEvents-group
+
 
