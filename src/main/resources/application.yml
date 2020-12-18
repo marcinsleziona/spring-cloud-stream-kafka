@@ -7,11 +7,12 @@ spring:
   cloud:
     stream:
       function:
-        definition: usersKeySelection;printUsers;productsKeySelection;printProducts;pullProductWatchedByUserEvents;printProductWatchedByUserEvents
+        #definition: usersKeySelection;printUsers;productsKeySelection;printProducts;pullProductWatchedByUserEvents;printProductWatchedByUserEvents;countUsersByProductCategory;printCountUsersByProductCategory
+        definition: usersKeySelection;printUsers;productsKeySelection;printProducts;pullProductWatchedByUserEvents;countUsersByProductCategory;printCountUsersByProductCategory
         bindings:
           pullProductWatchedByUserEvents-out-0: product-watched-by-user-source
       poller:
-        fixed-delay: 500
+        fixed-delay: 2000
 
       # stream bridge
       source: pullUsers;pullProducts
@@ -27,6 +28,11 @@ spring:
               producer:
                 keySerde: org.apache.kafka.common.serialization.Serdes$LongSerde
                 valueSerde: org.springframework.kafka.support.serializer.JsonSerde
+            countUsersByProductCategory-out-0:
+              producer:
+                keySerde: org.apache.kafka.common.serialization.Serdes$StringSerde
+                valueSerde: org.apache.kafka.common.serialization.Serdes$LongSerde
+
 
       bindings:
         pullUsers-out-0:
@@ -61,4 +67,15 @@ spring:
           destination: product-watched-by-user-source
           group: printProductWatchedByUserEvents-group
 
+        countUsersByProductCategory-in-0:
+          destination: product-watched-by-user-source
+          group: countUsersByProductCategory-0-group
+        countUsersByProductCategory-in-1:
+          destination: products
+          group: countUsersByProductCategory-1-group
+        countUsersByProductCategory-out-0:
+          destination: count-users-by-product-category
 
+        printCountUsersByProductCategory-in-0:
+          destination: count-users-by-product-category
+          group: printCountUsersByProductCategory-group

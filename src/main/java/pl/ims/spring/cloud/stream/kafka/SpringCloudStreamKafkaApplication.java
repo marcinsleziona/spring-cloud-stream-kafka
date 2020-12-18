@@ -1,6 +1,10 @@
 package pl.ims.spring.cloud.stream.kafka;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.kstream.Grouped;
+import org.apache.kafka.streams.kstream.Joined;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +15,8 @@ import pl.ims.spring.cloud.stream.kafka.infrastructure.ProductRepository;
 import pl.ims.spring.cloud.stream.kafka.infrastructure.UserRepository;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -63,7 +69,7 @@ public class SpringCloudStreamKafkaApplication {
     public Supplier<ProductWatchedByUserEvent> pullProductWatchedByUserEvents() {
         return () ->
                 ProductWatchedByUserEvent.builder()
-                        .instant(Instant.now())
+                        .localDateTime(LocalDateTime.now())
                         .login(userRepository.findRandom().getLogin())
                         .productId(productRepository.findRandom().getId())
                         .build();
@@ -73,6 +79,29 @@ public class SpringCloudStreamKafkaApplication {
     @Bean
     public Consumer<ProductWatchedByUserEvent> printProductWatchedByUserEvents() {
         return System.out::println;
+    }
+
+    @Bean
+    public BiFunction<KStream<Long, ProductWatchedByUserEvent>, KTable<Long, Product>, KStream<String, Long>> countUsersByProductCategory() {
+        return (productWatchedByUserEventStream, productsTable) -> productWatchedByUserEventStream
+                .selectKey((key, value) -> value.getProductId())
+                .leftJoin(productsTable,
+                        (productWatchedByUserEventValue, productValue) -> new ProductWatchedByUserEventEnriched(productWatchedByUserEventValue, productValue),
+                        Joined.with(Serdes.Long(), Serdes.serdeFrom(new JsonSerializer<>(), new JsonDeserializer<>(ProductWatchedByUserEvent.class)), null)
+                        )
+                .map((key, value) -> new KeyValue<>(value.getProduct().getCategory().toString(), value))
+                .groupByKey(Grouped.with(Serdes.String(), Serdes.serdeFrom(new JsonSerializer<>(), new JsonDeserializer<>(ProductWatchedByUserEventEnriched.class))))
+                .count()
+                .toStream();
+    }
+
+    @Bean
+    public Consumer<KStream<String, Long>> printCountUsersByProductCategory() {
+        return input ->
+                input
+                        .foreach((key, value) -> {
+                            System.out.println("Category: " + key + " Count: " + value);
+                        });
     }
 
 

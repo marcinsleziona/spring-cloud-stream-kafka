@@ -16,5 +16,6 @@ public class User {
     private String login;
     private String firstname;
     private String lastname;
+    private Gender gender;
 
 }
