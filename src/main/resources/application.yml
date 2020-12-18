@@ -12,7 +12,7 @@ spring:
         bindings:
           pullProductWatchedByUserEvents-out-0: product-watched-by-user-source
       poller:
-        fixed-delay: 2000
+        fixed-delay: 500
 
       # stream bridge
       source: pullUsers;pullProducts
