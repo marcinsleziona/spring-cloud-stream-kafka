@@ -3,10 +3,8 @@ package pl.ims.spring.cloud.stream.kafka;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.kstream.Grouped;
-import org.apache.kafka.streams.kstream.Joined;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.state.Stores;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -91,7 +89,7 @@ public class SpringCloudStreamKafkaApplication {
                         )
                 .map((key, value) -> new KeyValue<>(value.getProduct().getCategory().toString(), value))
                 .groupByKey(Grouped.with(Serdes.String(), Serdes.serdeFrom(new JsonSerializer<>(), new JsonDeserializer<>(ProductWatchedByUserEventEnriched.class))))
-                .count()
+                .count(Materialized.as(Stores.inMemoryKeyValueStore("count-store")))
                 .toStream();
     }
 

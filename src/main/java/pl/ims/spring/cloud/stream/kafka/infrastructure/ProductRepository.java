@@ -22,7 +22,7 @@ public class ProductRepository {
 
     @PostConstruct
     public void init() {
-        int count = 2;
+        int count = 50;
         products = Stream.iterate(1, i -> i + 1)
                 .limit(count)
                 .map(integer -> Product.builder()

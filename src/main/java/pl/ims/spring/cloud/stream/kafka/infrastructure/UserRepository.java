@@ -20,7 +20,7 @@ public class UserRepository {
 
     @PostConstruct
     public void init() {
-        int count = 10;
+        int count = 200;
         users = Stream.iterate(1, i -> i + 1)
                 .limit(count)
                 .map(integer -> User.builder()
